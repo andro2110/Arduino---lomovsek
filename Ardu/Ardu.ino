@@ -31,6 +31,8 @@ char printpritisk[6];
 char printvisina[6];
 char printvlaga[3];
 
+int jsButt;
+
 void setup(){
   Serial.begin(9600);
 
@@ -39,7 +41,7 @@ void setup(){
 
   unsigned status;
   //preverja, če je use okej
-  status = bme.begin();  
+  status = bme.begin(0x76);  
   if (!status) {
       Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
       Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16);
@@ -51,7 +53,7 @@ void setup(){
   }
    
   ekran.begin();  
-  ekran.background(0,0,0); // clear the screen
+  ekran.background(0,0,0); // clears the screen
   ekran.stroke(255,0,255);
   // static text
   ekran.text("Temperatura:",0,2);
@@ -69,12 +71,20 @@ void setup(){
   // increase font size for text in loop()
   ekran.setTextSize(1);
 
-
+  pinMode(A2, INPUT);
   pinMode(5, OUTPUT); //prizge backlight na zaslonu
   digitalWrite(5, HIGH);
 }
 
 void loop(){
+  jsButt = analogRead(A2);
+  Serial.println(jsButt);
+
+  if(jsButt == 0)
+  {
+    tone(4, 500, 100);
+  }
+  
   values();
 }
 
@@ -99,7 +109,7 @@ void values(){
     ekran.text(printvlaga, 54, 32);
     
     //zbriše podatke in refresha zaslon
-    delay(100);
+    delay(10);
     ekran.stroke(0, 0, 0);
     ekran.text(printtemp, 72, 2);
     ekran.text(printpritisk, 48, 12);
