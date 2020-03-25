@@ -23,11 +23,17 @@ TFT ekran = TFT(CS, DC, RESET);
 
 Adafruit_BME280 bme; // I2C
 
-int jsButton;
-int vrx;
-int vry;
-int xpos;
-int ypos;
+// variable to keep track of the elapsed time
+// char array to print time
+char printtemp[5];
+char printpritisk[6];
+char printvisina[6];
+char printvlaga[3];
+char pikica[2];
+
+void narisiPikico();
+int xpos = 0; //dej na 0
+int counter = 0;
 
 void setup(){
   Serial.begin(9600);
@@ -50,26 +56,45 @@ void setup(){
    
   ekran.begin();  
   ekran.background(0,0,0); // clears the screen
-  ekran.stroke(255,0,255);
+  // static text
   
+  
+  // increase font size for text in loop()
+  ekran.setTextSize(1);
 
-  pinMode(A2, INPUT);//switch na joysticku
-  pinMode(A0, INPUT);//x pozicija
-  pinMode(A1, INPUT);//y pozicija
-  
+  pinMode(A2, INPUT);
   pinMode(5, OUTPUT); //prizge backlight na zaslonu
   digitalWrite(5, HIGH);
 }
 
 void loop(){
-  vrx = analogRead(A0);
-  vry = analogRead(A1);
-  jsButton = analogRead(A2);
+  String temp = String(bme.readTemperature());
+  String dot = String(".");
+  temp.toCharArray(printtemp, 5);
+  dot.toCharArray(pikica, 2);
 
-  xpos = map(vrx, 0, 1023, 0, 160);
-  ypos = map(vry, 0, 1023, 0, 160);
+  int ypos = map(bme.readTemperature(), -64, 128, 0, 100);
+  
+  ekran.stroke(255, 255, 255);
+  ekran.text("Termperatura", 0, 2);
+  ekran.text(" *C", 95, 2);
+  ekran.text(printtemp, 72, 2);
+  ekran.text(pikica, xpos, ypos);
+  Serial.println(xpos);
+  
 
-  millis();
-  ekran.text("*", xpos, ypos);
-  ekran.background(0, 0, 0);
+  delay(10);
+ 
+ ekran.stroke(0, 0, 0);
+ ekran.text(printtemp, 72, 2);
+
+  if(counter % 10 == 0)//desetinka sekunde
+    xpos++;
+  if(xpos == 160) // dej na 128
+    {
+      ekran.background(0, 0, 0);
+      xpos = 0;//dej na 0
+    }
+
+  counter++;
 }
